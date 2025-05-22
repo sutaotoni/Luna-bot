@@ -59,6 +59,7 @@ def receber():
     return "OK", 200
 
 def responder(telefone, texto):
+    print(f"[DEBUG] Iniciando resposta para: {telefone} - Texto: {texto}")
     try:
         delay = random.randint(60, 300)
         print(f"Esperando {delay} segundos antes de responder...")
@@ -75,8 +76,10 @@ def responder(telefone, texto):
         for parte in partes:
             enviar_mensagem_whatsapp(telefone, parte)
             time.sleep(2)
+    print("[DEBUG] Palavra-chave 'horário' detectada")
         if "horário" in texto.lower():
-            notificar_garota(f"O cliente perguntou sobre horários: {texto}")
+            notificar_garota(f"O cliente perguntou sobre horários:
+"{texto}"")
     except Exception as e:
         print(f"[ERRO] {str(e)}")
 
