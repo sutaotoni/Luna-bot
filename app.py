@@ -78,8 +78,8 @@ def responder(telefone, texto):
             time.sleep(2)
     print("[DEBUG] Palavra-chave 'horário' detectada")
         if "horário" in texto.lower():
-            notificar_garota(f"O cliente perguntou sobre horários:
-"{texto}"")
+           notificar_garota("O cliente perguntou sobre horários:")
+print(f"{texto}")
     except Exception as e:
         print(f"[ERRO] {str(e)}")
 
