@@ -60,7 +60,7 @@ def receber():
 def responder(telefone, texto):
     print(f"[DEBUG] Iniciando resposta para: {telefone} - Texto: {texto}")
     try:
-        delay = random.randint(60, 300)  # Entre 1 e 5 minutos (segundos)
+        delay = random.randint(30, 120)  # Entre 0,5 e 2 minutos (segundos)
         print(f"Esperando {delay} segundos antes de responder...")
         time.sleep(delay)
         resposta = client.chat.completions.create(
