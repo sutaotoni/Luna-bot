@@ -30,7 +30,8 @@ def enviar_mensagem_whatsapp(numero, mensagem):
         "type": "text",
         "text": {"body": mensagem}
     }
-    requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data)
+    print(f"[DEBUG] Envio WhatsApp status: {response.status_code} | {response.text}")
 
 def notificar_garota(mensagem):
     if ALERTA_TELEFONE:
