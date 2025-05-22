@@ -76,8 +76,7 @@ def responder(telefone, texto):
             enviar_mensagem_whatsapp(telefone, parte)
             time.sleep(2)
         if "horário" in texto.lower():
-            notificar_garota(f"O cliente perguntou sobre horários:")
-"{texto}"")
+            notificar_garota(f"O cliente perguntou sobre horários: {texto}")
     except Exception as e:
         print(f"[ERRO] {str(e)}")
 
