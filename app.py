@@ -60,28 +60,28 @@ def receber():
 
 def responder(telefone, texto):
     print(f"[DEBUG] Iniciando resposta para: {telefone} - Texto: {texto}")
-    try:
-        delay = random.randint(60, 300)
-        print(f"Esperando {delay} segundos antes de responder...")
-        time.sleep(delay)
-        resposta = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Você é uma acompanhante chamada Luna. Seja gentil, provocante e receptiva."},
-                {"role": "user", "content": texto}
-            ]
-        )
-        resposta_texto = resposta.choices[0].message.content
-        partes = [resposta_texto[i:i+600] for i in range(0, len(resposta_texto), 600)]
-        for parte in partes:
-            enviar_mensagem_whatsapp(telefone, parte)
-            time.sleep(2)
+   try:
+    delay = random.randint(60, 300)
+    print(f"Esperando {delay} segundos antes de responder...")
+    time.sleep(delay)
+    resposta = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Você é uma acompanhante chamada Luna. Seja gentil, provocante e receptiva."},
+            {"role": "user", "content": texto}
+        ]
+    )
+    resposta_texto = resposta.choices[0].message.content
+    partes = [resposta_texto[i:i+600] for i in range(0, len(resposta_texto), 600)]
+    for parte in partes:
+        enviar_mensagem_whatsapp(telefone, parte)
+        time.sleep(2)
     print("[DEBUG] Palavra-chave 'horário' detectada")
-        if "horário" in texto.lower():
-           notificar_garota("O cliente perguntou sobre horários:")
-print(f"{texto}")
-    except Exception as e:
-        print(f"[ERRO] {str(e)}")
+    if "horário" in texto.lower():
+        notificar_garota("O cliente perguntou sobre horários:")
+    print(f"{texto}")
+except Exception as e:
+    print(f"[ERRO] {str(e)}")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
