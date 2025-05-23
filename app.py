@@ -1,4 +1,4 @@
-rom flask import Flask, request
+from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 from utils import gerar_resposta, verificar_mensagem_sensivel, enviar_alerta
 import os
