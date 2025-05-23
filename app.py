@@ -1,86 +1,42 @@
+rom flask import Flask, request
+from twilio.twiml.messaging_response import MessagingResponse
+from utils import gerar_resposta, verificar_mensagem_sensivel, enviar_alerta
 import os
-import time
-import threading
-import random
-from flask import Flask, request
-from openai import OpenAI
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 
-# Variáveis de ambiente — MESMOS NOMES do Render
-VERIFY_TOKEN = "luna_verify_token"
-PHONE_NUMBER_ID = os.environ.get("PHONE_NUMBER_ID")    # ID do número do WhatsApp no painel Meta
-WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN")      # Token do WhatsApp do painel Meta
-OPENAI_KEY = os.environ.get("OPENAI_API_KEY")          # Sua chave da OpenAI
-ALERTA_TELEFONE = os.environ.get("ALERTA_TELEFONE")    # Número para alerta (opcional)
-ALERTA_EMAIL = os.environ.get("ALERTA_EMAIL")          # Email para alerta (opcional)
+# Dicionário para guardar o modo automático por número
+modos = {}
 
-client = OpenAI(api_key=OPENAI_KEY)
+@app.route("/bot", methods=["POST"])
+def bot():
+    numero = request.values.get("From", "")
+    msg = request.values.get("Body", "").strip()
 
-def enviar_mensagem_whatsapp(numero, mensagem):
-    import requests
-    url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
-    headers = {
-        "Authorization": f"Bearer {WHATSAPP_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "messaging_product": "whatsapp",
-        "to": numero,
-        "type": "text",
-        "text": {"body": mensagem}
-    }
-    requests.post(url, headers=headers, json=data)
+    # Se for a garota, ativa o modo manual para esse número
+    if numero == os.getenv("NUMERO_GAROTA"):
+        modos[numero] = "manual"
+        return "Modo manual ativado."
 
-def notificar_garota(mensagem):
-    if ALERTA_TELEFONE:
-        enviar_mensagem_whatsapp(ALERTA_TELEFONE, f"[Alerta da Luna] {mensagem}")
-    if ALERTA_EMAIL:
-        print(f"[EMAIL ENVIADO PARA {ALERTA_EMAIL}] - {mensagem}")
+    # Se a conversa estiver em modo manual, não responder
+    if modos.get(numero) == "manual":
+        return "Aguardando resposta manual da garota."
 
-@app.route("/webhook", methods=["GET"])
-def verificar():
-    if request.args.get("hub.verify_token") == VERIFY_TOKEN:
-        return request.args.get("hub.challenge")
-    return "Erro de verificação", 403
+    # Verifica se a mensagem é sensível
+    if verificar_mensagem_sensivel(msg):
+        enviar_alerta(numero, msg)
+        return responder("Espera um minutinho que já te respondo, tá bom? 💋")
 
-@app.route("/webhook", methods=["POST"])
-def receber():
-    dados = request.get_json()
-    try:
-        mensagens = dados["entry"][0]["changes"][0]["value"]["messages"]
-        for msg in mensagens:
-            telefone = msg["from"]
-            texto = msg["text"]["body"]
-            threading.Thread(target=responder, args=(telefone, texto)).start()
-    except KeyError:
-        pass
-    return "OK", 200
+    # Gera resposta sensual
+    resposta = gerar_resposta(msg)
+    return responder(resposta)
 
-def responder(telefone, texto):
-    print(f"[DEBUG] Iniciando resposta para: {telefone} - Texto: {texto}")
-    try:
-        delay = random.randint(30, 120)  # Entre 0,5 e 2 minutos (segundos)
-        print(f"Esperando {delay} segundos antes de responder...")
-        time.sleep(delay)
-        resposta = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Você é uma acompanhante chamada Luna. Seja gentil, provocante e receptiva."},
-                {"role": "user", "content": texto}
-            ]
-        )
-        resposta_texto = resposta.choices[0].message.content
-        partes = [resposta_texto[i:i+600] for i in range(0, len(resposta_texto), 600)]
-        for parte in partes:
-            enviar_mensagem_whatsapp(telefone, parte)
-            time.sleep(2)
-        if "horário" in texto.lower():
-            print("[DEBUG] Palavra-chave 'horário' detectada")
-            notificar_garota("O cliente perguntou sobre horários:")
-        print(f"[DEBUG] Mensagem enviada para: {telefone}")
-    except Exception as e:
-        print(f"[ERRO] {str(e)}")
+def responder(texto):
+    twilio_response = MessagingResponse()
+    twilio_response.message(texto)
+    return str(twilio_response)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True)
