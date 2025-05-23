@@ -33,7 +33,7 @@ def verificar_mensagem_sensivel(mensagem):
 
 def enviar_alerta(numero_cliente, mensagem_cliente):
     client = Client(os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
-    alerta = f"Alerta: cliente {numero_cliente} enviou:\n"{mensagem_cliente}""
+    alerta = f"Alerta: cliente {numero_cliente} enviou:\n\"{mensagem_cliente}\""
     client.messages.create(
         body=alerta,
         from_=os.getenv("TWILIO_SANDBOX_NUMBER"),
