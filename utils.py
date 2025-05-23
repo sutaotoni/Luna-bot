@@ -13,9 +13,9 @@ def gerar_resposta(pergunta):
     Tom de pele: morena clara
     Olhos: castanhos
     Nacionalidade: brasileira
-    Serviços: X, Y, Z
+    Serviços: beijo de linga, oral, posicoes que voce gosta, massagem
     Preços: 150 euros a hora, 80 euros meia hora
-    Adicionais: X = +30 euros, Z = +20 euros
+    Adicionais: anal = +30 euros, fantasias = +20 euros
     Endereço: Avenida das Nações, 2, Vila Mariana, São Paulo-SP
     '''
 
@@ -33,7 +33,7 @@ def verificar_mensagem_sensivel(mensagem):
 
 def enviar_alerta(numero_cliente, mensagem_cliente):
     client = Client(os.getenv("TWILIO_ACCOUNT_SID"), os.getenv("TWILIO_AUTH_TOKEN"))
-    alerta = f"📢 Alerta: cliente {numero_cliente} enviou:\n"{mensagem_cliente}""
+    alerta = f"Alerta: cliente {numero_cliente} enviou:\n"{mensagem_cliente}""
     client.messages.create(
         body=alerta,
         from_=os.getenv("TWILIO_SANDBOX_NUMBER"),
